@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "tough-mechanic-370015",
+  "private_key_id": "6bd6927facd296eda165f184a320af2b7cef7c84",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDOdD4WaX9zSM6k\nYq5w06X+BIdiVgX9fZNlwJUE1BKrnsk6ttU+fviKYrpTPmQsHg/Rmqvb4Dl6Pk/G\n4JSgEQqzyNSI+O9CMkvF4LFoHcSmN5uv/H67ZJcZuP4BBUscUdcXB1kdFkAgdHV3\nLeyRYlIR3EBwopBV2eu0Ge+XdbCFecRiouYgZKXKOknGvcDT+UlNWEFWw4XgXM9k\nZ0Bq8z5WBlzxeLdI+wka6oRmN2XA+loLHGyy9QfJsyQKKYqM+p3HrfEvo0l4ZAwQ\nMZSM4yfOPDL4ULykJNyBZmOXXyrUVAv9SBBy7ug4KpbL1Vj1b+Iy9GZNfLtBQYri\n9YX/vMurAgMBAAECggEAAXI00Z7UU/vukKZsRZzJMVIv5f4Z2qgv2CImZFko4+TG\nqxEmglX1uXm00y5deiow9HQcWk+wesnqNdhoIhtjiMLvnrR0/owHRDEAPiw0IBtY\nDU0Ggy4omVnhCh+o2h5Q3ciVlOCmkjGHS6JspHv19oBPYPsfP6ZfEQ2FW14Ae/xb\n3u87964ZN+yn5MUJ97WoU9LJxzrdexZXPQa7X/V9XWhnJeEEbQFyOrDuvhVAeacM\na1/zK2+ei/FW4UN/r2Krz1f0H/cknmunByQwcHWFAaNRLyrAKG1rZCMhn/VyUwjw\nZuZGM7sfrH4KjOlvtWRLVzd1nwVVJhMg1yJi0YaHAQKBgQDx3+usJhYEcpGu10Ig\nxQK9wKyKj0Kz0qXoj3aHcOkquXJZtATUhHbjRX5i4PGvgCHupAvj5U8O1XOv4MeN\ntt4pTMc31x9p1STohcnQoyDLQG44A7ao80o3MQDMvpO39ZiQ3bmDQ7oeyUuLSq3X\n0jmYnVdQ83v/NVmQwRBshGBzAQKBgQDagsamHdCJKs4CwekvBSzft5nuTp2g34FE\nPdkb5GznghYG7oBTyXuvDowu8QmJ3f40YNaufbMzl9XJ0xS6ue2/wtuJvO/0P+Gg\nUQXo3DqmH542Mz9ZL3JLZwZImaNj8A0i5FwgdIk4k6O2S3vzbTcc9xVOCeTif9QD\nM32S8AH6qwKBgQDHN9KqANijoyXg50V9Liea2MaEfYjICdlC2l8bIWG7IfFQdxh/\nXfd6K/P0Ryhpj9Ti9NUiSO273w2hMDfMvnDvfWCc2p/yEG+M4R0frizFm/TsSAq7\nz18yZDcvbEzI+Q1HTIiO2ErFLrD9Mm5LU8jCrd2MPG/F/VAfDRWU+9dhAQKBgHjw\nouQ0YkRZJbbO/rIgqiqUoyUL7CCrNA/CL5VJg6FLFcf2X56ASO2mHp6omD/vV5BD\n/O6M8g9fPVu8cZ+74sQdJIeCxEiqxsWFssCki+2AWH/lM224Xgkv14F9T7qzlYG3\nZOottflTdewisVMVIsjsVKVhwoY+e+jdqeYW4vGLAoGBALPogBL6fek7JQAkGCIu\nXEzIOQn+C8QMWKu8SmpBWbW2rpd5oM7K0irpz+QwU2fefIawVen2qzxgcI/KsnJo\nvQp1B6WiuWdoCZWMLdvfe4ng50XGfbKzaDvfX+yw3z5jF/DBA3VLZIHFQvvX6oWG\nUv2gWM47soB9jh5LJat3dfrS\n-----END PRIVATE KEY-----\n",
+  "client_email": "capstone-event-photos@tough-mechanic-370015.iam.gserviceaccount.com",
+  "client_id": "112826748613766188221",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/capstone-event-photos%40tough-mechanic-370015.iam.gserviceaccount.com"
+}
