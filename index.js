@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const port = 3333
+// const port = 3333
 const WebSocket = require("ws");
 const {Pool} = require('pg')
 const bodyParser = require('body-parser')
@@ -58,8 +58,8 @@ const pool = new Pool({
 })
 
 // run application server
-const myServer = app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+const myServer = app.listen(process.env.PORT, () => {
+    console.log(`Example app listening on port ${process.env.PORT}`)
 })
 
 const wsServer = new WebSocket.Server({
