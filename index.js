@@ -6,12 +6,8 @@ const {Pool} = require('pg')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const uploadImage = require('./herlpers/herlpers.js')
-const email = require("./email/sendEmail.js")
 require('dotenv').config()
-// const axios = require('axios')
 
-const sendEmailObj = email.sendEmail
-// sendEmailObj()
 
 
 const app = express()
