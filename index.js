@@ -7,6 +7,8 @@ const bodyParser = require('body-parser')
 const multer = require('multer')
 const uploadImage = require('./herlpers/herlpers.js')
 require('dotenv').config()
+// const axios = require('axios')
+
 
 
 
@@ -54,7 +56,7 @@ const eventControllerObj = new eventController()
 
 // run application server
 const myServer = app.listen(process.env.PORT, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`Example app listening on port ${process.env.PORT}`)
 })
 
 const wsServer = new WebSocket.Server({
