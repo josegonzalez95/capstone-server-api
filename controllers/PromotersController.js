@@ -7,6 +7,12 @@ class PromotersController {
         this.model = promoterModelObj
     }
 
+    /**
+     * log in promoter endpoint
+     *
+     * @param {*} req.body.email - email of the promoter to be logged in.
+     * @param {*} req.body.password - password of the promoter to be logged in.
+     */
     logIn(email, password){
         return new Promise(async(resolve, reject)=>{
             try {
@@ -21,6 +27,14 @@ class PromotersController {
         })
     }
 
+    /**
+     * create a promoter, same endpoint used to sign up promoters
+     *
+     * @param {*} req.body.email - email of the promoter to be queried.
+     * @param {*} req.body.password - password of the promoter to be queried.
+     * @param {*} req.body.address - address of the promoter to be queried.
+     * @param {*} req.body.name - name of the promoter to be queried.
+     */
     insertPromoter(name, password, email, address){
         return new Promise(async(resolve, reject) => {
             try {
@@ -35,6 +49,9 @@ class PromotersController {
         });
     }
 
+    /**
+     * get all promoters, no params. directly calls the model to get all promoters from the database
+     */
     showAllPromoters(){
         return new Promise(async(resolve, reject) => {
             try {
@@ -49,6 +66,11 @@ class PromotersController {
         });
     }
 
+    /**
+     * get single promoter from the database
+     *
+     * @param {*} req.body.id - id of the promoter to be queried.
+     */
     showPromoter(id){
         return new Promise(async(resolve, reject) => {
             try {
@@ -63,9 +85,22 @@ class PromotersController {
         });
     }
 
+    /**
+     * update a promoter
+     *
+     * @param {*} req.body.id - id of the promoter to be updated.
+     * @param {optional} req.body.email - id of the promoter to be updated.
+     * @param {optional} req.body.password - password of the promoter to be updated.
+     * @param {optional} req.body.address - address of the promoter to be updated.
+     * @param {optional} req.body.name - name of the promoter to be updated.
+     */
     editPromoter(id, name, password, email, address){
         return new Promise(async(resolve, reject)=>{
             try{
+                /**
+                 * props to edit is a variable containing the name of column and the value submitted by the client,
+                 * if a value was not submmited for a property it will be undefined
+                */
                 const propsToEdit = [{value: name, propName:"name"}, {value: password, propName:"password"}, {value: email, propName:"email"}, {value: address, propName:"address"}]
                 // console.log(propsToEdit)
                 const updatedPromoter = await this.model.udpatePromoter(id, propsToEdit)
@@ -79,6 +114,11 @@ class PromotersController {
         })
     }
 
+    /**
+     * delete single promoter from the database
+     *
+     * @param {*} req.body.id - id of the promoter to be deleted.
+     */
     removePromoter(id){
         return new Promise(async(resolve, reject)=>{
             try{

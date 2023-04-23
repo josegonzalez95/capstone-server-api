@@ -1,25 +1,28 @@
 const {Pool} = require('pg')
+/**
+ * Import DB connection object
+ */
 const {DB} = require('../dbconfig/index.js')
 
+/**
+ * Participant Model Class Object, each function execute sql queries with the information sent by the controller
+ */
 class ParticipantsModel{
     constructor(){
-        // const connection_url = "jdbc:postgresql://ec2-34-197-91-131.compute-1.amazonaws.com:5432/deurl2dd6unmb5"
-        // const connection_url = "postgres://qlxouxhpuqlcli:c416400a0bd65ef07cc531dbe05b05e643983c24c7019898e083bdffc214a672@ec2-23-20-211-19.compute-1.amazonaws.com:5432/d7mu35vh781rtv"
-
-        // this.pool = new Pool({
-        //     connectionString:connection_url,
-        //     ssl:{rejectUnauthorized: false},
-        //     max: 20,
-        //     idleTimeoutMillis: 30000
-        // });
         this.db = DB
     }
 
-    // getters
-    // get promoter(){
-    //     return this.readPromoter();
-    // }
-
+    /**
+     * create a participant
+     *
+     * @param {*} req.body.email - id of the participant to be queried.
+     * @param {*} req.body.phone - phone of the participant to be queried.
+     * @param {*} req.body.address - address of the participant to be queried.
+     * @param {*} req.body.name - name of the participant to be queried.
+     * @param {*} req.body.category - category of the participant to be queried.
+     * @param {*} req.body.birthdate - birthdate of the participant to be queried.
+     * @param {*} req.body.gender - gender of the participant to be queried.
+     */
     createParticipant(name, email, phone, address, birthdate, category, gender){
         return new Promise(async (resolve, reject) => {
             try {
@@ -41,7 +44,10 @@ class ParticipantsModel{
         });
     }
 
-    readAllParticipant(){
+    /**
+     * get all participants, no params. directly calls the model to get all participants from the database
+     */
+    readAllParticipants(){
         return new Promise(async (resolve, reject) => {
             try {
                 // const db = await this.pool.connect()
@@ -57,6 +63,11 @@ class ParticipantsModel{
         });
     }
 
+    /**
+     * get single participant from the database
+     *
+     * @param {*} req.body.id - id of the participant to be queried.
+     */
     readParticipant(id){
         return new Promise(async (resolve, reject) => {
             try {
@@ -73,20 +84,59 @@ class ParticipantsModel{
         });
     }
 
-    udpateParticipant(id){
+    /**
+     * update a participant
+     *
+     * @param {*} req.body.id - id of the participant to be updated.
+     * @param {optional} req.body.propsToEdit - columns to be edited.
+     */
+    udpateParticipant(id, propsToEdit){
+        let propsToUpdate = ''
+        /**
+         * this will check props to edit, if the value is not undefined 
+         * it will get the value and the name of the column and create a string 
+         * to contact to the end of the query indicating the columns with the values to be edited
+         */
+        propsToEdit.forEach(prop =>{
+            if(prop.value){
+                propsToUpdate += `${prop.propName}='${prop.value}', `
+            }
+        })
+
+        console.log('props to update', propsToUpdate.slice(0,-2))
+        propsToUpdate = propsToUpdate.slice(0,-2)
         return new Promise(async(resolve, reject)=>{
             try{
-                
+                (await this.db).query(`update participants SET ${propsToUpdate} where id=${id};`, (err, response)=>{
+                    console.log(response)
+                    let insertResult = response.rowCount
+                    let result = insertResult > 0 ? "success":"failed"
+                    return resolve({
+                        result: result,
+                    });
+                })
             }catch(error){
                 console.log(error)
             }
         })
     }
 
+    /**
+     * delete single participant from the database
+     *
+     * @param {*} req.body.id - id of the participant to be deleted.
+     */
     deleteParticipant(id){
         return new Promise(async(resolve, reject)=>{
             try{
-                
+                (await this.db).query(`delete FROM participants where id=${id};`, (err, response)=>{
+                    console.log(response)
+                    let insertResult = response.rowCount
+                    let result = insertResult > 0 ? "success":"failed"
+                    return resolve({
+                        result: result,
+                    });
+                })
             }catch(error){
                 console.log(error)
             }

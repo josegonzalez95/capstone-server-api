@@ -1,11 +1,18 @@
 const express = require('express')
 const cors = require('cors')
-// const port = 3333
+const port = 3333
 const WebSocket = require("ws");
 const {Pool} = require('pg')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const uploadImage = require('./herlpers/herlpers.js')
+const email = require("./email/sendEmail.js")
+require('dotenv').config()
+// const axios = require('axios')
+
+const sendEmailObj = email.sendEmail
+// sendEmailObj()
+
 
 const app = express()
 app.use(cors())
@@ -47,19 +54,11 @@ const eventsController = require('./controllers/EventsController')
 const eventController = eventsController.EventsController
 const eventControllerObj = new eventController()
 
-//Postgresql DB connection
-const pool = new Pool({
-    // connectionString:"jdbc:postgresql://ec2-34-197-91-131.compute-1.amazonaws.com:5432/deurl2dd6unmb5",
-    //connectionString:"postgres://njupbwybsaqiqt:3935f060b092cdc8a630a2ba09c9b00e0ac1131c3fc28b01b77182cbb0e1d3f6@ec2-34-197-91-131.compute-1.amazonaws.com:5432/deurl2dd6unmb5",
-    connectionString:"postgres://qlxouxhpuqlcli:c416400a0bd65ef07cc531dbe05b05e643983c24c7019898e083bdffc214a672@ec2-23-20-211-19.compute-1.amazonaws.com:5432/d7mu35vh781rtv",
-    ssl:{rejectUnauthorized: false},
-    max: 20,
-    idleTimeoutMillis: 30000
-})
+
 
 // run application server
-const myServer = app.listen(process.env.PORT, () => {
-    console.log(`Example app listening on port ${process.env.PORT}`)
+const myServer = app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
 })
 
 const wsServer = new WebSocket.Server({
@@ -103,7 +102,11 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-
+/**
+ * upload image endpoint to store event images in google cloud storage
+ *
+ * @param {*} req.body.file - image file to be uploaded.
+ */
 app.post('/uploads', async (req, res, next) => {
     console.log(req)
     try {
@@ -128,7 +131,9 @@ app.post('/uploads', async (req, res, next) => {
     next()
   })
 
-
+/**
+ * get all promoters, no params. directly calls the controller and the model to get all promoters from the database
+ */
 app.get('/getAllPromoters', async(req, res)=>{
     try {
         const promoters = await promoterControllerObj.showAllPromoters()
@@ -138,6 +143,11 @@ app.get('/getAllPromoters', async(req, res)=>{
     }
 })
 
+/**
+ * get single promoter from the database
+ *
+ * @param {*} req.body.id - id of the promoter to be queried.
+ */
 app.post('/getPromoter', async(req, res)=>{
     try {
         const {id} = req.body
@@ -148,6 +158,12 @@ app.post('/getPromoter', async(req, res)=>{
     }
 })
 
+/**
+ * log in promoter endpoint
+ *
+ * @param {*} req.body.email - email of the promoter to be logged in.
+ * @param {*} req.body.password - password of the promoter to be logged in.
+ */
 app.post('/logInPromoter', async(req, res)=>{
     console.log(req.body)
     try {
@@ -159,7 +175,14 @@ app.post('/logInPromoter', async(req, res)=>{
     }
 })
 
-
+/**
+ * create a promoter, same endpoint used to sign up promoters
+ *
+ * @param {*} req.body.email - id of the promoter to be queried.
+ * @param {*} req.body.password - password of the promoter to be queried.
+ * @param {*} req.body.address - address of the promoter to be queried.
+ * @param {*} req.body.name - name of the promoter to be queried.
+ */
 app.post('/createPromoter',async(req, res)=>{
     console.log('create promoter call', req.body)
     try {
@@ -171,6 +194,11 @@ app.post('/createPromoter',async(req, res)=>{
     }
 })
 
+/**
+ * delete single promoter from the database
+ *
+ * @param {*} req.body.id - id of the promoter to be deleted.
+ */
 app.post('/deletePromoter',async(req, res)=>{
     try {
         const {id} = req.body
@@ -181,6 +209,15 @@ app.post('/deletePromoter',async(req, res)=>{
     }
 })
 
+/**
+ * update a promoter
+ *
+ * @param {*} req.body.id - id of the promoter to be updated.
+ * @param {optional} req.body.email - id of the promoter to be updated.
+ * @param {optional} req.body.password - password of the promoter to be updated.
+ * @param {optional} req.body.address - address of the promoter to be updated.
+ * @param {optional} req.body.name - name of the promoter to be updated.
+ */
 app.post('/updatePromoter',async(req, res)=>{
     try {
         const {id, name, password, email, address} = req.body
@@ -192,6 +229,9 @@ app.post('/updatePromoter',async(req, res)=>{
     }
 })
 
+/**
+ * get all participants, no params. directly calls the controller and the model to get all participants from the database
+ */
 app.get('/getAllParticipants', async(req, res)=>{
     try {
         const participants = await participantControllerObj.showAllParticipants()
@@ -201,7 +241,12 @@ app.get('/getAllParticipants', async(req, res)=>{
     }
 })
 
-app.get('/getParticipant', async(req, res)=>{
+/**
+ * get single participant from the database
+ *
+ * @param {*} req.body.id - id of the participant to be queried.
+ */
+app.post('/getParticipant', async(req, res)=>{
     try {
         const {id} = req.body
         const participant = await participantControllerObj.showParticipant(id)
@@ -211,6 +256,17 @@ app.get('/getParticipant', async(req, res)=>{
     }
 })
 
+/**
+ * create a participant
+ *
+ * @param {*} req.body.email - id of the participant to be queried.
+ * @param {*} req.body.phone - phone of the participant to be queried.
+ * @param {*} req.body.address - address of the participant to be queried.
+ * @param {*} req.body.name - name of the participant to be queried.
+ * @param {*} req.body.category - category of the participant to be queried.
+ * @param {*} req.body.birthdate - birthdate of the participant to be queried.
+ * @param {*} req.body.gender - gender of the participant to be queried.
+ */
 app.post('/createParticipant',async(req, res)=>{
     console.log(req.body)
     try {
@@ -221,6 +277,46 @@ app.post('/createParticipant',async(req, res)=>{
         console.log(error)
     }
 })
+
+/**
+ * update a participant
+ *
+ * @param {*} req.body.id - id of the promoter to be updated.
+ * @param {optional} req.body.email - id of the promoter to be updated.
+ * @param {optional} req.body.address - address of the promoter to be updated.
+ * @param {optional} req.body.name - name of the promoter to be updated.
+ * @param {optional} req.body.phone - phone of the participant to be updated.
+ * @param {optional} req.body.category - category of the participant to be updated.
+ * @param {optional} req.body.birthdate - birthdate of the participant to be updated.
+ * @param {optional} req.body.gender - gender of the participant to be updated.
+ */
+app.post('/updateParticipant',async(req, res)=>{
+
+    try {
+        const {id, name, email, address, phone, birthdate, category, gender} = req.body
+        console.log(req.body)
+        const updatedParticipant = await participantControllerObj.editParticipant(id, name, email, address, phone, birthdate, category, gender)
+        res.send({"updatedParticipant":updatedParticipant.result})
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+/**
+ * delete single participant from the database
+ *
+ * @param {*} req.body.id - id of the participant to be deleted.
+ */
+app.post('/deleteParticipant',async(req, res)=>{
+    try {
+        const {id} = req.body
+        const deletedParticipant = await participantControllerObj.removeParticipant(id)
+        res.send({"deletedParticipant":deletedParticipant.result})
+    } catch (error) {
+        console.log(error)
+    }
+})
+
 ///////////////////////////////////////////
 //rose
 app.get('/getAllOrders', async(req, res)=>{
