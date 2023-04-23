@@ -53,7 +53,7 @@ const eventControllerObj = new eventController()
 
 
 // run application server
-const myServer = app.listen(port, () => {
+const myServer = app.listen(process.env.PORT, () => {
     console.log(`Example app listening on port ${port}`)
 })
 
