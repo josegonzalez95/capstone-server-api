@@ -19,7 +19,13 @@ class TicketsModel{
     // getTicket(){
     //     return this.readPromoter();
     // }
-
+    /**
+     * Creates and asigns an id to a new order and adds it to the datebase.
+     *
+     * @param {*} orderid - id number of the order tied to the ticket.
+     * @param {*} participantid - id number of the participant the ticket belongs to.
+     * @param {*} eventid - id number of the event the ticket is tied to.
+     */
     createTicket(orderid, participantid, eventid){
         return new Promise(async (resolve, reject) => {
             try {
@@ -36,7 +42,10 @@ class TicketsModel{
             }
         });
     }
-
+    /** 
+    * Finds and displays list of all tickets currently in database.
+    *
+    */
     readAllTickets(){
         return new Promise(async (resolve, reject) => {
             try {
@@ -52,7 +61,11 @@ class TicketsModel{
             }
         });
     }
-
+    /**
+     * Finds and diplays the ticket with the given id.
+     *
+     * @param {*} id - id number of the ticket.
+     */
     readTicket(ticketID){
         return new Promise(async (resolve, reject) => {
             try {
@@ -68,7 +81,12 @@ class TicketsModel{
             }
         });
     }
-
+    /**
+     * Finds and updates the list of properties given on the ticket with the given id.
+     *
+     * @param {*} id - id number of the ticket.
+     * @param {*} propsToEdit - list of properties that compose a ticket
+     */
     updateTicket(id, propsToEdit){
         let propsToUpdate = ''
 
@@ -97,7 +115,11 @@ class TicketsModel{
             }
         })
     }
-
+    /**
+     * Finds and deletes the ticket with the given id.
+     *
+     * @param {*} id - id number of the ticket.
+     */
     deleteTicket(ticketID){
         return new Promise(async(resolve, reject)=>{
             try{
@@ -115,7 +137,11 @@ class TicketsModel{
             }
         })
     }
-
+    /**
+     * Counts all the tickets related to the event they are tied to.
+     *
+     * @param {*} ticketid - id number of the event.
+     */
     numberOfTickets(ticketid){
         return new Promise(async (resolve, reject) => {
             try {

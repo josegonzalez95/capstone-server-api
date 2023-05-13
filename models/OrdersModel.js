@@ -19,6 +19,12 @@ class OrdersModel{
     // get promoter(){
     //     return this.readPromoter();
     // }
+    /**
+     * Creates and asigns an id to a new order and adds it to the datebase.
+     *
+     * @param {*} orderEmail - string with the email of the user who created the order.
+     * @param {*} orderDetails - string with payment method to be used.
+     */
 
     createOrder(orderEmail, orderDetails){
         return new Promise(async (resolve, reject) => {
@@ -37,7 +43,10 @@ class OrdersModel{
             }
         });
     }
-
+    /**
+     * Finds and displays list of all orders currently in database.
+     *
+     */
     readAllOrders(){
         return new Promise(async (resolve, reject) => {
             try {
@@ -53,7 +62,11 @@ class OrdersModel{
             }
         });
     }
-
+    /**
+     * Finds and diplays the order with the given id.
+     *
+     * @param {*} id - id number of the order.
+     */
     readOrder(id){
         return new Promise(async (resolve, reject) => {
             try {
@@ -69,7 +82,12 @@ class OrdersModel{
             }
         });
     }
-
+    /**
+     * Finds and updates the list of properties given on the order with the given id.
+     *
+     * @param {*} id - id number of the order.
+     * @param {*} propsToEdit - list of properties that compose an order
+     */
     udpateOrder(id, propsToEdit){
         let propsToUpdate = ''
 
@@ -98,7 +116,11 @@ class OrdersModel{
             }
         })
     }
-
+    /**
+     * Finds and deletes the order with the given id.
+     *
+     * @param {*} id - id number of the order.
+     */
     deleteOrder(id){
         return new Promise(async(resolve, reject)=>{
             try{
