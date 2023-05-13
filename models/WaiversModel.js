@@ -20,11 +20,11 @@ class WaiversModel{
     //     return this.readPromoter();
     // }
 
-    createWaiver(partipantId, document, signed){
+    createWaiver(esignature, participantid){
         return new Promise(async (resolve, reject) => {
             try {
                 // const db = await this.pool.connect()
-                (await this.db).query(`insert into waivers (partipantId, document, signed) VALUES ('${partipantId}', '${document}', '${signed}')`, (err, response)=>{
+                (await this.db).query(`insert into relievewaver (esignature, participantid) VALUES ('${esignature}', '${participantid}');`, (err, response)=>{
                     let insertResult = response.rowCount
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({
@@ -37,11 +37,11 @@ class WaiversModel{
         });
     }
 
-    readAllWaiver(){
+    readAllWaivers(){
         return new Promise(async (resolve, reject) => {
             try {
                 // const db = await this.pool.connect()
-                (await this.db).query('SELECT * FROM waivers;', (err, response)=>{
+                (await this.db).query('SELECT * FROM relievewaver;', (err, response)=>{
                     let result = response.rows
                     return resolve({
                         result: result,
@@ -53,11 +53,11 @@ class WaiversModel{
         });
     }
 
-    readWaiver(id){
+    readWaiver(participantid){
         return new Promise(async (resolve, reject) => {
             try {
                 // const db = await this.pool.connect()
-                (await this.db).query(`SELECT * FROM waivers WHERE id=${id};`, (err, response)=>{
+                (await this.db).query(`SELECT * FROM relievewaver WHERE participantid=${participantid};`, (err, response)=>{
                     let result = response.rows[0]
                     return resolve({
                         result: result,
@@ -69,20 +69,47 @@ class WaiversModel{
         });
     }
 
-    udpateWaiver(id){
+    udpateWaiver(esignature, participantid){
+        // let propsToUpdate = ''
+
+        // propsToEdit.forEach(prop =>{
+        //     if(prop.value){
+        //         propsToUpdate += `${prop.propName}='${prop.value}', `
+        //     }
+        // })
+
+        // console.log('props to update', propsToUpdate.slice(0,-2))
+        // propsToUpdate = propsToUpdate.slice(0,-2)
+
         return new Promise(async(resolve, reject)=>{
             try{
-                
+                //const db = await this.pool.connect()
+                (await this.db).query(`update relievewaver SET esignature = ${esignature} where participantid=${participantid};`, (err, response)=>{
+                    console.log(response)
+                    let insertResult = response.rowCount
+                    let result = insertResult > 0 ? "success":"failed"
+                    return resolve({
+                        result: result,
+                    });
+                })
             }catch(error){
                 console.log(error)
             }
         })
     }
 
-    deleteWaiver(id){
+    deleteWaiver(participantid){
         return new Promise(async(resolve, reject)=>{
             try{
-                
+                //const db = await this.pool.connect()
+                (await this.db).query(`delete FROM relievewaver where participantid=${participantid};`, (err, response)=>{
+                    //console.log(response)
+                    let insertResult = response.rowCount
+                    let result = insertResult > 0 ? "success":"failed"
+                    return resolve({
+                        result: result,
+                    });
+                })
             }catch(error){
                 console.log(error)
             }

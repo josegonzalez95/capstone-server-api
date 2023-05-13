@@ -52,7 +52,9 @@ const eventsController = require('./controllers/EventsController')
 const eventController = eventsController.EventsController
 const eventControllerObj = new eventController()
 
-
+const waiversController = require('./controllers/WaiversController.js')
+const waiverController = waiversController.WaiversController
+const waiverControllerObj = new waiverController()
 
 // run application server
 const myServer = app.listen(process.env.PORT, () => {
@@ -434,7 +436,10 @@ app.post('/numberOfParticipants', async(req,res)=>{
     }
 })
 // end rose
-
+//Leonel
+/**
+ * get all events, no params. directly calls the controller and the model to get all events from the database
+ */
 app.get('/getAllEvents', async(req, res)=>{
     try {
         const events = await eventControllerObj.showAllEvents()
@@ -443,7 +448,11 @@ app.get('/getAllEvents', async(req, res)=>{
         console.log(error)
     }
 })
-
+/**
+ * get single event from the database
+ *
+ * @param {*} req.body.id - id of the event to be queried.
+ */
 app.post('/getEvent', async(req, res)=>{
     try {
         const {id} = req.body
@@ -455,6 +464,11 @@ app.post('/getEvent', async(req, res)=>{
     }
 })
 
+/**
+ * get all the events from a specific promoter from the database
+ *
+ * @param {*} req.body.id - promoterid of the event to be queried.
+ */
 app.post('/getEventsByPomoter', async(req, res)=>{
     try {
         const {id} = req.body
@@ -466,6 +480,18 @@ app.post('/getEventsByPomoter', async(req, res)=>{
     }
 })
 
+/**
+ * create an event
+ *
+ * @param {*} req.body.id - id of the event to be created.
+ * @param {*} req.body.promoterid - promoterid of the event to be created.
+ * @param {*} req.body.details - details of the event to be created.
+ * @param {*} req.body.price - price of the event to be created.
+ * @param {*} req.body.location - name of the event to be created.
+ * @param {*} req.body.photo - photo of the participant to be created.
+ * @param {*} req.body.date - date of the participant to be created.
+ * @param {*} req.body.title - title of the participant to be created.
+ */
 app.post('/createEvent',async(req, res)=>{
     console.log('create event endpoint call', req.body)
     try {
@@ -476,7 +502,18 @@ app.post('/createEvent',async(req, res)=>{
         console.log(error)
     }
 })
-
+/**
+ * update an event
+ *
+ * @param {*} req.body.id - id of the event to be updated.
+ * @param {optional} req.body.promoterid - promoterid of the event to be updated.
+ * @param {optional} req.body.details - details of the event to be updated.
+ * @param {optional} req.body.price - price of the event to be updated.
+ * @param {optional} req.body.location - name of the event to be updated.
+ * @param {optional} req.body.photo - photo of the participant to be updated.
+ * @param {optional} req.body.date - date of the participant to be updated.
+ * @param {optional} req.body.title - title of the participant to be updated.
+ */
 app.post('/updateEvent',async(req, res)=>{
     try {
         const {id, promoterid, details, price, location, photo, date, title} = req.body
@@ -487,7 +524,11 @@ app.post('/updateEvent',async(req, res)=>{
         console.log(error)
     }
 })
-
+/**
+ * get single event from the database
+ *
+ * @param {*} req.body.id - id of the event to be queried.
+ */
 app.post('/deleteEvent',async(req, res)=>{
     try {
         const {id} = req.body
@@ -510,6 +551,11 @@ app.post('/getEventsByDate', async(req,res)=>{
     }
 })
 
+/**
+ * get all the participants from a specific event from the database
+ *
+ * @param {*} req.body.id - id of the event to be queried.
+ */
 app.post('/participantsByEvent', async(req, res)=>{
     try {
         const {eventid} = req.body
@@ -521,19 +567,81 @@ app.post('/participantsByEvent', async(req, res)=>{
     }
 })
 
-// dbListeners = async ()=>{
-//     const db = await pool.connect()
-//     try {
-//         await db.query('LISTEN update')
-//         await db.query('LISTEN insert')
-//         console.log('Listening for changes in datbase...')
+/**
+ * get all waivers, no params. directly calls the controller and the model to get all waivers from the database
+ */
+app.get('/getAllWaivers', async(req, res)=>{
+    try {
+        const waivers = await waiverControllerObj.showAllWaivers()
+        res.send({"waivers":waivers.result})
+    } catch (error) {
+        console.log(error)
+    }
+})
 
-//         db.on('notification', (msg)=>{
-//             console.log(`Recieved notification, ${msg.channel} in: ${msg.payload} table`)
-//             wsServer.emit('insert')
-//         })
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
-// dbListeners()
+/**
+ * get a specific waiver from the database
+ *
+ * @param {*} req.body.participantid - id of the waiver to be queried.
+ */
+app.post('/getWaiver', async(req, res)=>{
+    try {
+        const {participantid} = req.body
+        console.log(participantid)
+        const waiver = await waiverControllerObj.showWaiver(participantid)
+        res.send({"waiver":waiver.result})
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+/**
+ * create a waiver
+ *
+ * @param {*} req.body.participantid - partcipantid of the waiver to be created.
+ * @param {*} req.body.esignature - esignature value of the waiver to be created.
+ */
+app.post('/createWaiver',async(req, res)=>{
+    console.log('create waiver call', req.body)
+    try {
+        const {esignature, participantid} = req.body 
+        const newWaiver = await waiverControllerObj.insertWaiver(esignature, participantid)
+        res.send({"newWaiver":newWaiver.result})
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+/**
+ * update a specific waiver in the database
+ *
+ * @param {*} req.body.participantid - partcipantid of the waiver to be updated.
+ * @param {*} req.body.esignature - esignature value of the waiver to be updated.
+ */
+app.post('/updateWaiver',async(req, res)=>{
+    try {
+        const {esignature, participantid} = req.body
+        console.log("update request:",req.body)
+        const updatedWaiver = await waiverControllerObj.editWaiver(esignature, participantid)
+        res.send({"updatedWaiver":updatedWaiver.result})
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+/**
+ * delete single waiver from the database
+ *
+ * @param {*} req.body.participantid - partcipantid of the waiver to be deleted.
+ */
+app.post('/deleteWaiver',async(req, res)=>{
+    try {
+        const {participantid} = req.body
+        console.log("Delete request:",participantid.body)
+        const deletedWaiver = await waiverControllerObj.removeWaiver(participantid)
+        res.send({"deletedWaiver":deletedWaiver.result})
+    } catch (error) {
+        console.log(error)
+    }
+})
+//Leonel End
