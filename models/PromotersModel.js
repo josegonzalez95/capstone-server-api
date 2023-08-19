@@ -3,6 +3,7 @@ const {Pool} = require('pg')
  * Import DB connection object
  */
 const { DB } = require('../dbconfig/index.js')
+require('dotenv').config()
 
 /**
  * Promoters Model Class Object, each function execute sql queries with the information sent by the controller
@@ -19,11 +20,11 @@ class PromotersModel{
      * @param {*} req.body.password - id of the promoter to be queried.
      */
     logInPromoter(email, password){
-        console.log('log in model call', email, password)
+        console.log('log in model call', email, password) 
         try {
             return new Promise(async(resolve, reject)=>{
                 // const db = await this.pool.connect()
-                (await this.db).query(`SELECT * FROM promoters WHERE email='${email}' and password='${password}';`, (err, response)=>{
+                (await this.db).query(`SELECT * FROM promoters WHERE email='${email}' and password=crypt('${password}', password);`, (err, response)=>{
                     console.log(response)
                     let selectResult = response.rowCount
                     let status = selectResult > 0 ? "success":"failed"
@@ -50,7 +51,7 @@ class PromotersModel{
         return new Promise(async (resolve, reject) => {
             try {
                 // const db = await this.pool.connect()
-                (await this.db).query(`insert into promoters (name, password, email, address) VALUES ('${name}', '${password}', '${email}', '${address}')`, (err, response)=>{
+                (await this.db).query(`insert into promoters (name, password, email, address) VALUES ('${name}', crypt('${password}', gen_salt('${process.env.SALT_ALG}')), '${email}', '${address}')`, (err, response)=>{
                     console.log(response)
                     let insertResult = response ? response.rowCount:0
                     let result = insertResult > 0 ? "success":"failed"
