@@ -7,6 +7,7 @@ const bodyParser = require('body-parser')
 const multer = require('multer')
 const uploadImage = require('./herlpers/herlpers.js')
 require('dotenv').config()
+var fetch = require('node-fetch');
 // const axios = require('axios')
 
 
@@ -56,6 +57,10 @@ const waiversController = require('./controllers/WaiversController.js')
 const waiverController = waiversController.WaiversController
 const waiverControllerObj = new waiverController()
 
+const totalOrdersController = require('./controllers/TotalOrderController.js')
+const totalOrderController = totalOrdersController.TotalOrderController
+const totalOrderControllerObj = new totalOrderController()
+
 // run application server
 const myServer = app.listen(process.env.PORT, () => {
     console.log(`Example app listening on port ${process.env.PORT}`)
@@ -100,6 +105,48 @@ myServer.on('upgrade', async function upgrade(request, socket, head) {      //ha
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
+})
+
+app.post('/create-paypal-order',(req, res)=>{
+    const { price } = req.body
+    fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'PayPal-Request-Id': '7b92603e-77ed-4896-8e78-5dea2050476a',
+            'Authorization': 'Bearer 6V7rbVwmlM1gFZKW_8QtzWXqpcwQ6T5vhEGYNJDAAdn3paCgRpdeMdVYmWzgbKSsECednupJ3Zx5Xd-g'
+        },
+        body: JSON.stringify({ "intent": "CAPTURE", "purchase_units": [ { "amount": { "currency_code": "USD", "value": `${price}` } } ], "payment_source": { "paypal": { "experience_context": { "payment_method_preference": "IMMEDIATE_PAYMENT_REQUIRED", "locale": "en-US", "landing_page": "LOGIN", "user_action": "PAY_NOW", "return_url": "https://example.com/returnUrl", "cancel_url": "https://example.com/cancelUrl" } } } })
+    })
+    .then((response) => response.json())
+    .then((order) => res.status(500).send({orderId: order.id}));
+})
+
+app.post('/capture-paypal-order', (req, res)=>{
+    const { orderID } = req.body
+    fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderID}/capture`, {
+        method: 'POST',
+        headers: {
+            'PayPal-Request-Id': '7b92603e-77ed-4896-8e78-5dea2050476a',
+            'Authorization': 'Bearer access_token6V7rbVwmlM1gFZKW_8QtzWXqpcwQ6T5vhEGYNJDAAdn3paCgRpdeMdVYmWzgbKSsECednupJ3Zx5Xd-g'
+        }
+    })
+    .then((response) => response.json())
+    .then((orderData) => {
+          const name = orderData.payer.name.given_name;
+    });
+})
+
+app.post("/totalOrderCreate", async(req, res)=>{
+    try {
+        const {participants, paymentMethod, orderCreatorEmail, eventId} = req.body
+        const newOrder = await totalOrderControllerObj.insertTotalOrder(participants, paymentMethod, orderCreatorEmail, eventId)
+        // res.send({"new total order":newOrder.result})
+        res.status(200).send({"newTotalOrder":newOrder.result});
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({"newTotalOrder":"error at endpoint"});
+    }
 })
 
 /**
