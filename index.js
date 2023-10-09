@@ -8,9 +8,9 @@ const multer = require('multer')
 const uploadImage = require('./herlpers/herlpers.js')
 require('dotenv').config()
 var fetch = require('node-fetch');
+const stripe = require('stripe')(process.env.stripe_secret);
+
 // const axios = require('axios')
-
-
 
 
 const app = express()
@@ -57,7 +57,8 @@ const waiversController = require('./controllers/WaiversController.js')
 const waiverController = waiversController.WaiversController
 const waiverControllerObj = new waiverController()
 
-const totalOrdersController = require('./controllers/TotalOrderController.js')
+const totalOrdersController = require('./controllers/TotalOrderController.js');
+const { sendEmail } = require('./herlpers/email.js');
 const totalOrderController = totalOrdersController.TotalOrderController
 const totalOrderControllerObj = new totalOrderController()
 
@@ -107,6 +108,81 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
+app.post('/get-charge-object', async(req, res)=>{
+    try {
+        const { charge_id } = req.body
+        const charge = await stripe.charges.retrieve(
+            charge_id
+        );
+        // const charge = await stripe.paymentIntents.retrieve(
+        //     'pi_3Nz6IDDhrjzxPiXM27Bwo9OY'
+        //   );
+        console.log(charge)
+        res.status(200).send({receipt_url: charge.receipt_url})
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({message:"something went wrong retrieving charge object"})
+    }
+})
+
+app.post('/send-email',async(req, res)=>{
+    try {
+        sendEmail()
+        res.send("wohoo")
+    } catch (error) {
+        console.log('too bad of an email')
+        res.send('wrong')
+    }
+})
+
+app.post('/create-intent', async(req, res)=>{
+    try {
+        console.log('payment intent', req.body)
+        const { amount, orderBodySend, paymentIntentResponse } = req.body
+        console.log(paymentIntentResponse)
+        console.log(amount)
+        const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount*100,
+        currency: 'usd',
+        automatic_payment_methods: {enabled: true},
+        description: 'Thanks for your purchase!',
+        receipt_email: 'jggm9090@gmail.com',
+        // payment_method_types: ['card']
+        });
+        console.log(paymentIntent)
+        res.status(200).send({client_secret: paymentIntent.client_secret, pi: paymentIntent.id, paymentId: paymentIntent.payment_method_configuration_details.id})
+    } catch (error) {
+        res.status(500).send({message:"error occured processing payment"})
+    }
+})
+
+app.post('/confirm-payment', async(req, res)=>{
+    try {
+        const {paymentId, pi} = req.body
+        const paymentIntent = await stripe.paymentIntents.confirm(
+            pi,
+            {payment_method: paymentId, payment_method_types: ['automatic_payment_methods'], receipt_email: "gonzalez.massini@gmail.com", return_url:"localhost:3000"},
+        );
+        res.status(200).send({status: paymentIntent.status})
+    } catch (error) {
+        res.status(500).send({message: 'error occured completing payment'})
+    }
+
+})
+
+app.post('/get-payment-intent', async(req, res)=>{
+    try {
+        const {paymentId} = req.body
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+            paymentId
+          );
+        console.log(paymentIntent)
+        res.status(200).send({paymentIntent: paymentIntent})
+    } catch (error) {
+        res.status(500).send({paymentIntent: {status: "failed"}})
+    }
+})
+
 app.post('/create-paypal-order',(req, res)=>{
     const { price } = req.body
     fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
@@ -139,8 +215,9 @@ app.post('/capture-paypal-order', (req, res)=>{
 
 app.post("/totalOrderCreate", async(req, res)=>{
     try {
-        const {participants, paymentMethod, orderCreatorEmail, eventId} = req.body
-        const newOrder = await totalOrderControllerObj.insertTotalOrder(participants, paymentMethod, orderCreatorEmail, eventId)
+        console.log("total order creation")
+        const {participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId} = req.body
+        const newOrder = await totalOrderControllerObj.insertTotalOrder(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId)
         // res.send({"new total order":newOrder.result})
         res.status(200).send({"newTotalOrder":newOrder.result});
     } catch (error) {

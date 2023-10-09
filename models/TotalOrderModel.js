@@ -44,7 +44,7 @@ class TotalOrderModel{
      * @param {*} orderDetails - string with payment method to be used.
      */
 
-    createOrder(participants, paymentMethod, orderCreatorEmail, eventId){
+    createOrder(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId){
         return new Promise(async (resolve, reject) => {
             const pool = new Pool({
                 connectionString:connection_url,
@@ -54,7 +54,7 @@ class TotalOrderModel{
             });
             // const client = new Client(); 
             const client = pool.connect()
-            console.log(participants, paymentMethod, orderCreatorEmail, eventId)
+            console.log(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId)
             try {
                 // await client.connect(); // Connect to the database
         
@@ -72,7 +72,7 @@ class TotalOrderModel{
                 console.log("create participants", createParticipants)
                 const insertedParticipantsId = createParticipants.rows.map(row => row.id)
 
-                const createOrder = await (await client).query(`INSERT INTO orders (orderemail, paymentdetails) VALUES ('${orderCreatorEmail}', '${paymentMethod}') RETURNING id`)
+                const createOrder = await (await client).query(`INSERT INTO orders (orderemail, paymentdetails) VALUES ('${orderCreatorEmail}', '${paymentIntentId}') RETURNING id`)
                 const inertedOrderId = createOrder.rows[0].id;
                 let ticketString = ''
 

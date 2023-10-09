@@ -147,7 +147,9 @@ class ParticipantsModel{
         return new Promise(async (resolve, reject) => {
             try {
                 // const db = await this.pool.connect()
-                (await this.db).query(`SELECT participantid,birthdate, email, name, category, phone, address, gender from  participants inner join tickets on participants.id = tickets.participantid where eventid=${eventid};`, (err, response)=>{
+                // (await this.db).query(`SELECT participantid,birthdate, email, name, category, phone, address, gender, orderid from  participants inner join tickets on participants.id = tickets.participantid where eventid=${eventid};`, (err, response)=>{
+                (await this.db).query(`SELECT participantid,birthdate, email, name, category, phone, address, gender, orderid, paymentdetails from  participants inner join tickets on participants.id = tickets.participantid inner join orders o on o.id = tickets.orderid where eventid=${eventid};`, (err, response)=>{
+
                     let result = response.rows
                     return resolve({
                         result: result,
