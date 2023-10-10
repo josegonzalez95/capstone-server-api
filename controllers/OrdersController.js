@@ -26,6 +26,36 @@ class OrdersController {
             }
         });
     }
+
+    showEventOrder(eventId){
+        return new Promise(async(resolve, reject) => {
+            try {
+                const orders = await this.model.readEventOrders(eventId)
+                // console.log(orders)
+                let result = orders.result
+                return resolve({
+                    result: result,
+                });
+            } catch (error) {
+                console.log(error)
+            }
+        });
+    }
+
+    showOrderParticipants(orderId){
+        return new Promise(async(resolve, reject) => {
+            try {
+                const orders = await this.model.orderParticipants(orderId)
+                // console.log(orders)
+                let result = orders.result
+                return resolve({
+                    result: result,
+                });
+            } catch (error) {
+                console.log(error)
+            }
+        });
+    }
     /**
      * Recieves the call find the all events currently in database,
      * and calls the order model.

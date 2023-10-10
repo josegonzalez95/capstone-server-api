@@ -96,14 +96,14 @@ class TicketsModel{
             }
         })
 
-        console.log('props to update', propsToUpdate.slice(0,-2))
+        // console.log('props to update', propsToUpdate.slice(0,-2))
         propsToUpdate = propsToUpdate.slice(0,-2)
 
         return new Promise(async(resolve, reject)=>{
             try{
                 // const db = await this.pool.connect()
                 (await this.db).query(`update tickets SET ${propsToUpdate} where id=${id};`, (err, response)=>{
-                    console.log(response)
+                    // console.log(response)
                     let insertResult = response.rowCount
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({
@@ -125,7 +125,7 @@ class TicketsModel{
             try{
                 // const db = await this.pool.connect()
                 (await this.db).query(`delete FROM tickets where id=${ticketID};`, (err, response)=>{
-                    console.log(response)
+                    // console.log(response)
                     let insertResult = response.rowCount
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({

@@ -55,7 +55,7 @@ class WaiversController {
         return new Promise(async(resolve, reject)=>{
             try{
                 // const propsToEdit = [{value: esignature, propName:"esignature"}]
-                console.log(esignature)
+                // console.log(esignature)
                 const udpateWaiver = await this.model.udpateWaiver(esignature, participantid)
                 let result = udpateWaiver.result
                 return resolve({

@@ -103,12 +103,12 @@ class ParticipantsModel{
             }
         })
 
-        console.log('props to update', propsToUpdate.slice(0,-2))
+        // console.log('props to update', propsToUpdate.slice(0,-2))
         propsToUpdate = propsToUpdate.slice(0,-2)
         return new Promise(async(resolve, reject)=>{
             try{
                 (await this.db).query(`update participants SET ${propsToUpdate} where id=${id};`, (err, response)=>{
-                    console.log(response)
+                    // console.log(response)
                     let insertResult = response.rowCount
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({
@@ -130,7 +130,7 @@ class ParticipantsModel{
         return new Promise(async(resolve, reject)=>{
             try{
                 (await this.db).query(`delete FROM participants where id=${id};`, (err, response)=>{
-                    console.log(response)
+                    // console.log(response)
                     let insertResult = response.rowCount
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({

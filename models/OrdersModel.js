@@ -43,6 +43,47 @@ class OrdersModel{
             }
         });
     }
+
+
+//     select distinct orderid, paymentdetails
+// from orders inner join tickets t on orders.id = t.orderid
+// where eventid=108;
+    readEventOrders(eventId){
+        return new Promise(async (resolve, reject) => {
+            try {
+                // const db = await this.pool.connect()
+                (await this.db).query(`SELECT distinct orderid, paymentdetails FROM orders inner join tickets t on orders.id = t.orderid WHERE eventid=${eventId};`, (err, response)=>{
+                    // console.log(response)
+                    let result = response.rows
+                    return resolve({
+                        result: result,
+                    });
+                })
+            } catch (error) {
+                console.log(error)
+            }
+        });
+    }
+
+    orderParticipants(orderId){
+        return new Promise(async (resolve, reject) => {
+            try {
+                // const db = await this.pool.connect()
+                
+                (await this.db).query(`SELECT orderid, paymentdetails, eventid, name, email, phone, category
+                from  participants inner join tickets on participants.id = tickets.participantid inner join orders o on o.id = tickets.orderid
+                where orderid=${orderId};`, (err, response)=>{
+                    // console.log(response)
+                    let result = response.rows
+                    return resolve({
+                        result: result,
+                    });
+                })
+            } catch (error) {
+                console.log(error)
+            }
+        });
+    }
     /**
      * Finds and displays list of all orders currently in database.
      *
@@ -104,7 +145,7 @@ class OrdersModel{
             try{
                 // const db = await this.pool.connect()
                 (await this.db).query(`update orders SET ${propsToUpdate} where id=${id};`, (err, response)=>{
-                    console.log(response)
+                    // console.log(response)
                     let insertResult = response.rowCount
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({
@@ -126,7 +167,7 @@ class OrdersModel{
             try{
                 // const db = await this.pool.connect()
                 (await this.db).query(`delete FROM orders where id=${id};`, (err, response)=>{
-                    console.log(response)
+                    // console.log(response)
                     let insertResult = response.rowCount
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({

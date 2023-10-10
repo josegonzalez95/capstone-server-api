@@ -25,7 +25,7 @@ class PromotersModel{
             return new Promise(async(resolve, reject)=>{
                 // const db = await this.pool.connect()
                 (await this.db).query(`SELECT * FROM promoters WHERE email='${email}' and password=crypt('${password}', password);`, (err, response)=>{
-                    console.log(response)
+                    // console.log(response)
                     let selectResult = response.rowCount
                     let status = selectResult > 0 ? "success":"failed"
                     let result = {promoter: response.rows[0], status: status}
@@ -52,7 +52,7 @@ class PromotersModel{
             try {
                 // const db = await this.pool.connect()
                 (await this.db).query(`insert into promoters (name, password, email, address) VALUES ('${name}', crypt('${password}', gen_salt('${process.env.SALT_ALG}')), '${email}', '${address}')`, (err, response)=>{
-                    console.log(response)
+                    // console.log(response)
                     let insertResult = response ? response.rowCount:0
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({
@@ -125,14 +125,14 @@ class PromotersModel{
             }
         })
 
-        console.log('props to update', propsToUpdate.slice(0,-2))
+        // console.log('props to update', propsToUpdate.slice(0,-2))
         propsToUpdate = propsToUpdate.slice(0,-2)
 
         return new Promise(async(resolve, reject)=>{
             try{
                 // const db = await this.pool.connect()
                 (await this.db).query(`update promoters SET ${propsToUpdate} where id=${id};`, (err, response)=>{
-                    console.log(response)
+                    // console.log(response)
                     let insertResult = response.rowCount
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({
@@ -155,7 +155,7 @@ class PromotersModel{
             try{
                 // const db = await this.pool.connect()
                 (await this.db).query(`delete FROM promoters where id=${id};`, (err, response)=>{
-                    console.log(response)
+                    // console.log(response)
                     let insertResult = response.rowCount
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({

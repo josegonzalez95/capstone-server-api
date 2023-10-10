@@ -41,12 +41,12 @@ class EventsModel{
     }
 
     createEvent(promoterid, details, price, location, photo, date, title){
-        console.log(promoterid, details, price, location, photo, date, title)
+        // console.log(promoterid, details, price, location, photo, date, title)
         return new Promise(async (resolve, reject) => {
             try {
                 // const db = await this.pool.connect()
                 (await this.db).query(`insert into events (promoterid, details, price, location, photo, date, title) VALUES (${promoterid}, '${details}', ${price}, '${location}', '${photo}', '${date}', '${title}') RETURNING id;`, (err, response)=>{
-                    console.log(response)
+                    // console.log(response)
                     let insertResult = response.rowCount
                     let status = insertResult > 0 ? "success":"failed"
                     let result = {event: response.rows[0], status: status}
@@ -102,21 +102,21 @@ class EventsModel{
 
     udpateEvent(id, propsToEdit){
         let propsToUpdate = ''
-        console.log('props to update', propsToEdit)
+        // console.log('props to update', propsToEdit)
         propsToEdit.forEach(prop =>{
             if(prop.value){
                 propsToUpdate += `${prop.propName}='${prop.value}', `
             }
         })
 
-        console.log('props to update after for each', propsToUpdate)
+        // console.log('props to update after for each', propsToUpdate)
         propsToUpdate = propsToUpdate.slice(0,-2)
 
         return new Promise(async(resolve, reject)=>{
             try{
                 //const db = await this.pool.DB
                 (await this.db).query(`update events SET ${propsToUpdate} where id=${id};`, (err, response)=>{
-                    console.log("response from db",response)
+                    // console.log("response from db",response)
                     let insertResult = response.rowCount
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({
@@ -150,7 +150,7 @@ class EventsModel{
                         end;
                 $$`
                 , (err, response)=>{
-                    console.log('query response', response)
+                    // console.log('query response', response)
                     let insertResult = response.rowCount
                     let result = insertResult > 0 ? "success":"failed"
                     return resolve({
@@ -172,7 +172,7 @@ class EventsModel{
             return new Promise(async (resolve, reject) => {
                 try {
                     (await this.db).query(`select * from events where date >= '${timestamp} 00:00:00.000' and date < '${timestamp} 23:59:59.998';`, (err, response)=>{
-                        console.log("query returns:",response)
+                        // console.log("query returns:",response)
                         let result = response.rows
                         return resolve({
                             result: result,

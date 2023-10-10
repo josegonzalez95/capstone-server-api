@@ -108,6 +108,26 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
+app.post('/search-payments', async(req, res)=>{
+    try {
+        const { eventId, orderId } = req.body
+        let paymentIntent = {}
+        if(eventId){
+            paymentIntent = await stripe.paymentIntents.search({
+                query: `metadata[\'event_id\']:\'${eventId}\'`,
+            });
+        }else if(orderId){
+            paymentIntent = await stripe.paymentIntents.search({
+                query: `metadata[\'order_id\']:\'${orderId}\'`,
+            });
+        }
+        
+        res.status(200).send({paymentIntent})
+    } catch (error) {
+        res.status(500).send({message:"something went wrong searching payments"})
+    }
+})
+
 app.post('/get-charge-object', async(req, res)=>{
     try {
         const { charge_id } = req.body
@@ -117,8 +137,8 @@ app.post('/get-charge-object', async(req, res)=>{
         // const charge = await stripe.paymentIntents.retrieve(
         //     'pi_3Nz6IDDhrjzxPiXM27Bwo9OY'
         //   );
-        console.log(charge)
-        res.status(200).send({receipt_url: charge.receipt_url})
+        // console.log(charge)
+        res.status(200).send({receipt_url: charge.receipt_url, charge})
     } catch (error) {
         console.log(error)
         res.status(500).send({message:"something went wrong retrieving charge object"})
@@ -137,10 +157,10 @@ app.post('/send-email',async(req, res)=>{
 
 app.post('/create-intent', async(req, res)=>{
     try {
-        console.log('payment intent', req.body)
+        // console.log('payment intent', req.body)
         const { amount, orderBodySend, paymentIntentResponse } = req.body
-        console.log(paymentIntentResponse)
-        console.log(amount)
+        // console.log(paymentIntentResponse)
+        // console.log(amount)
         const paymentIntent = await stripe.paymentIntents.create({
         amount: amount*100,
         currency: 'usd',
@@ -149,7 +169,7 @@ app.post('/create-intent', async(req, res)=>{
         receipt_email: 'jggm9090@gmail.com',
         // payment_method_types: ['card']
         });
-        console.log(paymentIntent)
+        // console.log(paymentIntent)
         res.status(200).send({client_secret: paymentIntent.client_secret, pi: paymentIntent.id, paymentId: paymentIntent.payment_method_configuration_details.id})
     } catch (error) {
         res.status(500).send({message:"error occured processing payment"})
@@ -176,7 +196,7 @@ app.post('/get-payment-intent', async(req, res)=>{
         const paymentIntent = await stripe.paymentIntents.retrieve(
             paymentId
           );
-        console.log(paymentIntent)
+        // console.log(paymentIntent)
         res.status(200).send({paymentIntent: paymentIntent})
     } catch (error) {
         res.status(500).send({paymentIntent: {status: "failed"}})
@@ -289,7 +309,7 @@ app.post('/getPromoter', async(req, res)=>{
  * @param {*} req.body.password - password of the promoter to be logged in.
  */
 app.post('/logInPromoter', async(req, res)=>{
-    console.log(req.body)
+    // console.log(req.body)
     try {
         const {email, password} = req.body
         const promoter = await promoterControllerObj.logIn(email, password)
@@ -308,7 +328,7 @@ app.post('/logInPromoter', async(req, res)=>{
  * @param {*} req.body.name - name of the promoter to be queried.
  */
 app.post('/createPromoter',async(req, res)=>{
-    console.log('create promoter call', req.body)
+    // console.log('create promoter call', req.body)
     try {
         const {name, password, email, address} = req.body
         const newPromoter = await promoterControllerObj.insertPromoter(name, password, email, address)
@@ -345,7 +365,7 @@ app.post('/deletePromoter',async(req, res)=>{
 app.post('/updatePromoter',async(req, res)=>{
     try {
         const {id, name, password, email, address} = req.body
-        console.log(req.body)
+        // console.log(req.body)
         const updatedPromoter = await promoterControllerObj.editPromoter(id, name, password, email, address)
         res.send({"updatedPromoter":updatedPromoter.result})
     } catch (error) {
@@ -392,7 +412,7 @@ app.post('/getParticipant', async(req, res)=>{
  * @param {*} req.body.gender - gender of the participant to be queried.
  */
 app.post('/createParticipant',async(req, res)=>{
-    console.log(req.body)
+    // console.log(req.body)
     try {
         const {name, email, phone, address, birthdate, category, gender} = req.body
         const newParticipant = await participantControllerObj.insertParticipant(name, email, phone, address, birthdate, category, gender)
@@ -418,7 +438,7 @@ app.post('/updateParticipant',async(req, res)=>{
 
     try {
         const {id, name, email, address, phone, birthdate, category, gender} = req.body
-        console.log(req.body)
+        // console.log(req.body)
         const updatedParticipant = await participantControllerObj.editParticipant(id, name, email, address, phone, birthdate, category, gender)
         res.send({"updatedParticipant":updatedParticipant.result})
     } catch (error) {
@@ -448,6 +468,30 @@ app.post('/deleteParticipant',async(req, res)=>{
  * 
  * 
  */
+
+app.post('/get-event-order', async(req, res)=>{
+    try {
+        const {eventId} = req.body
+        // console.log(eventId)
+        const orders = await orderControllerObj.showEventOrder(eventId)
+        // console.log(orders)
+        res.send({"orders":orders.result})
+    } catch (error) {
+        res.status(500).send({message: 'something went wrong fetching orders'})
+    }
+})
+
+app.post('/get-order-participants', async(req, res)=>{
+    try {
+        const {orderId} = req.body
+        const orders = await orderControllerObj.showOrderParticipants(orderId)
+        // console.log(orders)
+        res.send({"order":orders.result})
+    } catch (error) {
+        res.status(500).send({message: 'something went wrong fetching orders'})
+    }
+})
+
 app.get('/getAllOrders', async(req, res)=>{
     try {
         const orders = await orderControllerObj.showAllOrders()
@@ -458,7 +502,7 @@ app.get('/getAllOrders', async(req, res)=>{
 })
 
 app.get('/getOrder', async(req, res)=>{
-    console.log('getting order call', req.body)
+    // console.log('getting order call', req.body)
     try {
         const {id} = req.body
         const order = await orderControllerObj.showOrder(id)
@@ -469,7 +513,7 @@ app.get('/getOrder', async(req, res)=>{
 })
 
 app.post('/createOrder',async(req, res)=>{
-    console.log('create oreder call', req.body)
+    // console.log('create oreder call', req.body)
     try {
         const {orderemail, paymentdetails} = req.body 
         const newOrder = await orderControllerObj.insertOrder(orderemail, paymentdetails)
@@ -519,7 +563,7 @@ app.get('/getTicket', async(req, res)=>{
 })
 
 app.post('/createTicket',async(req, res)=>{
-    console.log('create ticket call', req.body)
+    // console.log('create ticket call', req.body)
     try {
         const {orderid, participantid, eventid} = req.body 
         const newTicket = await ticketControllerObj.insertTicket(orderid, participantid, eventid)
@@ -552,7 +596,7 @@ app.post('/updateTicket',async(req, res)=>{
 app.post('/numberOfParticipants', async(req,res)=>{
     try {
         const {eventid} = req.body
-        console.log(req.body)
+        // console.log(req.body)
         const ticketNumber = await ticketControllerObj.sumTickets(eventid)
         res.send({"ticketNumber":ticketNumber.result})
     } catch (error) {
@@ -580,7 +624,7 @@ app.get('/getAllEvents', async(req, res)=>{
 app.post('/getEvent', async(req, res)=>{
     try {
         const {id} = req.body
-        console.log(id)
+        // console.log(id)
         const event = await eventControllerObj.showEvent(id)
         res.send({"event":event.result})
     } catch (error) {
@@ -596,7 +640,7 @@ app.post('/getEvent', async(req, res)=>{
 app.post('/getEventsByPomoter', async(req, res)=>{
     try {
         const {id} = req.body
-        console.log(id)
+        // console.log(id)
         const event = await eventControllerObj.showEventsByPromoter(id)
         res.send({"events":event.result})
     } catch (error) {
@@ -617,7 +661,7 @@ app.post('/getEventsByPomoter', async(req, res)=>{
  * @param {*} req.body.title - title of the participant to be created.
  */
 app.post('/createEvent',async(req, res)=>{
-    console.log('create event endpoint call', req.body)
+    // console.log('create event endpoint call', req.body)
     try {
         const {promoterid, details, price, location, photo, date, title} = req.body
         const newEvent = await eventControllerObj.insertEvent(promoterid, details, price, location, photo, date, title)
@@ -641,7 +685,7 @@ app.post('/createEvent',async(req, res)=>{
 app.post('/updateEvent',async(req, res)=>{
     try {
         const {id, promoterid, details, price, location, photo, date, title} = req.body
-        console.log("update body", req.body)
+        // console.log("update body", req.body)
         const updatedEvent = await eventControllerObj.editEvent(id, promoterid, details, price, location, photo, date, title)
         res.send({"updatedEvent":updatedEvent.result})
     } catch (error) {

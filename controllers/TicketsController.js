@@ -78,7 +78,7 @@ class TicketsController {
         return new Promise(async(resolve, reject)=>{
             try{
                 const propsToEdit = [{value: participantid, propName:"participantid"}, {value: orderid, propName:"orderid"}, {value: eventid, propName:"eventid"}]
-                 console.log(propsToEdit)
+                //  console.log(propsToEdit)
                 const updatedTicket = await this.model.updateTicket(id, propsToEdit)
                 let result = updatedTicket.result
                 return resolve({

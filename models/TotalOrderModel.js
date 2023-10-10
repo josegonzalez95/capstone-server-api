@@ -1,6 +1,9 @@
 // const {Pool} = require('pg')
 const {DB} = require('../dbconfig/index.js')
 const { Pool, Client } = require('pg');
+require('dotenv').config()
+
+const stripe = require('stripe')(process.env.stripe_secret);
 
 // const pool = new Pool({
 //     user: 'your_db_user',
@@ -54,7 +57,7 @@ class TotalOrderModel{
             });
             // const client = new Client(); 
             const client = pool.connect()
-            console.log(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId)
+            // console.log(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId)
             try {
                 // await client.connect(); // Connect to the database
         
@@ -69,15 +72,20 @@ class TotalOrderModel{
                 })
                 const createParticipantsQuery = `insert into participants (name, email, phone, address, birthdate, category, gender) VALUES ${string.substring(0, string.length-1)} RETURNING id`
                 const createParticipants = await (await client).query(createParticipantsQuery)
-                console.log("create participants", createParticipants)
+                // console.log("create participants", createParticipants)
                 const insertedParticipantsId = createParticipants.rows.map(row => row.id)
 
                 const createOrder = await (await client).query(`INSERT INTO orders (orderemail, paymentdetails) VALUES ('${orderCreatorEmail}', '${paymentIntentId}') RETURNING id`)
-                const inertedOrderId = createOrder.rows[0].id;
+                const insertedOrderId = createOrder.rows[0].id;
                 let ticketString = ''
+                console.table({paymentIntentId, insertedOrderId, eventId})
+                await stripe.paymentIntents.update(
+                    paymentIntentId,
+                    {metadata: {order_id: insertedOrderId, event_id: eventId}}
+                  );
 
                 insertedParticipantsId.forEach(elm=>{
-                    ticketString = ticketString.concat(`(${elm}, ${inertedOrderId}, ${eventId}),`)
+                    ticketString = ticketString.concat(`(${elm}, ${insertedOrderId}, ${eventId}),`)
                 })
 
                 const createTicketsQuery = `INSERT INTO tickets (participantid, orderid,eventid) VALUES ${ticketString.substring(0, ticketString.length-1)}`
