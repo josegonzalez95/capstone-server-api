@@ -111,7 +111,7 @@ app.get('/', (req, res) => {
 app.post('/search-payments', async(req, res)=>{
     try {
         const { eventId, orderId } = req.body
-        let paymentIntent = {}
+        let paymentIntent = []
         if(eventId){
             paymentIntent = await stripe.paymentIntents.search({
                 query: `metadata[\'event_id\']:\'${eventId}\'`,
@@ -122,7 +122,11 @@ app.post('/search-payments', async(req, res)=>{
             });
         }
         
-        res.status(200).send({paymentIntent})
+        // console.log(paymentIntent);
+        const result = paymentIntent.data.map(order => {return { id: order.id, metadata:{order_id: order.metadata.order_id },created: order.created, amount: order.amount, status:order.status }})
+        // console.log(result)
+        
+        res.status(200).send({paymentIntent: {data: result}})
     } catch (error) {
         res.status(500).send({message:"something went wrong searching payments"})
     }
@@ -727,7 +731,6 @@ app.post('/getEventsByDate', async(req,res)=>{
 app.post('/participantsByEvent', async(req, res)=>{
     try {
         const {eventid} = req.body
-        console.log("participantsByEvent ",req.body)
         const participants = await participantControllerObj.showParticipantsByEvent(eventid)
         res.send({"participants":participants.result})
     } catch (error) {
