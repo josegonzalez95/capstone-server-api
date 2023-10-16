@@ -9,6 +9,9 @@ const uploadImage = require('./herlpers/herlpers.js')
 require('dotenv').config()
 var fetch = require('node-fetch');
 const stripe = require('stripe')(process.env.stripe_secret);
+const jwt = require("jsonwebtoken");
+const middleware = require('./middleware/auth.js')
+const {logIn} = require('./auth/login.js')
 
 // const axios = require('axios')
 
@@ -106,6 +109,11 @@ myServer.on('upgrade', async function upgrade(request, socket, head) {      //ha
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
+})
+
+app.get('/is-token-valid', middleware, (req, res)=>{
+    console.log('token is valid')
+    res.status(200).send({ok: true})
 })
 
 app.post('/search-payments', async(req, res)=>{
@@ -282,7 +290,7 @@ app.post('/uploads', async (req, res, next) => {
 /**
  * get all promoters, no params. directly calls the controller and the model to get all promoters from the database
  */
-app.get('/getAllPromoters', async(req, res)=>{
+app.get('/getAllPromoters', middleware, async(req, res)=>{
     try {
         const promoters = await promoterControllerObj.showAllPromoters()
         res.send({"promoters":promoters.result})
@@ -312,16 +320,29 @@ app.post('/getPromoter', async(req, res)=>{
  * @param {*} req.body.email - email of the promoter to be logged in.
  * @param {*} req.body.password - password of the promoter to be logged in.
  */
-app.post('/logInPromoter', async(req, res)=>{
-    // console.log(req.body)
-    try {
-        const {email, password} = req.body
-        const promoter = await promoterControllerObj.logIn(email, password)
-        res.send({"promoter":promoter.result})
-    } catch (error) {
-        console.log(error)
-    }
-})
+app.post('/logInPromoter', logIn
+// async(req, res)=>{
+//     // console.log(req.body)
+//     console.log('log in')
+//     try {
+//         const {email, password} = req.body
+//         const promoter = await promoterControllerObj.logIn(email, password)
+//         console.log(promoter)
+//         if(promoter.result.status === 'success'){
+//             const token = jwt.sign({
+//                 id: promoter.result.promoter.id,
+//             }, process.env.tokens_secret, { expiresIn: "15m" });
+//             res.send({"promoter":promoter.result, token})
+//             return
+//         }
+        
+//         res.send({"promoter":promoter.result})
+
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+)
 
 /**
  * create a promoter, same endpoint used to sign up promoters
@@ -485,7 +506,7 @@ app.post('/get-event-order', async(req, res)=>{
     }
 })
 
-app.post('/get-order-participants', async(req, res)=>{
+app.post('/get-order-participants', middleware, async(req, res)=>{
     try {
         const {orderId} = req.body
         const orders = await orderControllerObj.showOrderParticipants(orderId)
@@ -728,7 +749,7 @@ app.post('/getEventsByDate', async(req,res)=>{
  *
  * @param {*} req.body.id - id of the event to be queried.
  */
-app.post('/participantsByEvent', async(req, res)=>{
+app.post('/participantsByEvent', middleware, async(req, res)=>{
     try {
         const {eventid} = req.body
         const participants = await participantControllerObj.showParticipantsByEvent(eventid)
