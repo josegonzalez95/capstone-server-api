@@ -48,11 +48,12 @@ class OrdersModel{
 //     select distinct orderid, paymentdetails
 // from orders inner join tickets t on orders.id = t.orderid
 // where eventid=108;
+// fix when deleting tickets
     readEventOrders(eventId){
         return new Promise(async (resolve, reject) => {
             try {
                 // const db = await this.pool.connect()
-                (await this.db).query(`SELECT distinct orderid, paymentdetails FROM orders inner join tickets t on orders.id = t.orderid WHERE eventid=${eventId};`, (err, response)=>{
+                (await this.db).query(`SELECT distinct orderid, paymentdetails, payment_status, date_created, amount_payed FROM orders inner join tickets t on orders.id = t.orderid WHERE eventid=${eventId};`, (err, response)=>{
                     // console.log(response)
                     let result = response.rows
                     return resolve({
@@ -67,10 +68,11 @@ class OrdersModel{
 
     orderParticipants(orderId){
         return new Promise(async (resolve, reject) => {
+            // fix when deleting tickets
             try {
                 // const db = await this.pool.connect()
                 
-                (await this.db).query(`SELECT orderid, paymentdetails, eventid, name, email, phone, category
+                (await this.db).query(`SELECT orderid, paymentdetails, payment_status, date_created, amount_payed, eventid, name, email, phone, category
                 from  participants inner join tickets on participants.id = tickets.participantid inner join orders o on o.id = tickets.orderid
                 where orderid=${orderId};`, (err, response)=>{
                     // console.log(response)
@@ -123,6 +125,7 @@ class OrdersModel{
             }
         });
     }
+    
     /**
      * Finds and updates the list of properties given on the order with the given id.
      *

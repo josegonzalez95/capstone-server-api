@@ -2,6 +2,10 @@
 const {DB} = require('../dbconfig/index.js')
 const { Pool, Client } = require('pg');
 require('dotenv').config()
+const customValuesController = require('../controllers/CustomValuesController.js')
+const customValueController = customValuesController.CustomValuesController
+const customValueControllerObj = new customValueController()
+
 
 const stripe = require('stripe')(process.env.stripe_secret);
 
@@ -47,7 +51,8 @@ class TotalOrderModel{
      * @param {*} orderDetails - string with payment method to be used.
      */
 
-    createOrder(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId){
+    createOrder(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId, status, totalCharge, created){
+        console.table({participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId, status, totalCharge, created})
         return new Promise(async (resolve, reject) => {
             const pool = new Pool({
                 connectionString:connection_url,
@@ -66,6 +71,7 @@ class TotalOrderModel{
                 // Insert data into the first table and capture its result
                 // const result1 = await client.query('INSERT INTO table1 (column1, column2) VALUES ($1, $2) RETURNING id', [value1, value2]);
                 let string = ''
+                // console.log(participants)
 
                 participants.forEach((elm)=>{
                     string = string.concat(`('${elm.name}', '${elm.email}', '${elm.phone}', '${elm.address}', '${elm.birthdate}', '${elm.category}', '${elm.gender}'),`)
@@ -75,7 +81,63 @@ class TotalOrderModel{
                 // console.log("create participants", createParticipants)
                 const insertedParticipantsId = createParticipants.rows.map(row => row.id)
 
-                const createOrder = await (await client).query(`INSERT INTO orders (orderemail, paymentdetails) VALUES ('${orderCreatorEmail}', '${paymentIntentId}') RETURNING id`)
+
+                // for each participant
+                // match each custom value and cfid with its DB participant id
+                // create each custom value
+                let customValuesString = ""
+
+
+                // participants.forEach(async(participant, index)=>{
+                    // create custom fields for each participant
+                    console.log(participants);
+                for(let i = 0; i<participants.length; i++){
+                    try {
+                        let participant = participants[i]
+                        const customValues = participant.customValues
+                        console.log(customValues)
+                        // console.log(participant);
+                        let promiseAll = []
+                        for(let j = 0; j<customValues.length; j++){
+                            console.log(customValues[j].col_name)
+                            // console.log(`insert into customvalues (participantid, cfid, ${customValues[j].col_name}) values (${insertedParticipantsId[i]}, ${customValues[j].cfid}, ${customValues[j].col_name === 'string_value'? `'${customValues[j].value}'`:customValues[j].value});`);
+                            promiseAll.push((await client).query(`insert into customvalues (participantid, cfid, ${customValues[j].col_name}) values (${insertedParticipantsId[i]}, ${customValues[j].cfid}, ${customValues[j].col_name === 'string_value'? `'${customValues[j].value}'`:customValues[j].value});`))
+                        }
+                        await Promise.all(promiseAll)
+                    } catch (error) {
+                        console.error('Error executing queries:', error);
+                    }
+                }
+
+
+                // try {
+                //     const results = await Promise.all([
+                //         client.query(query1),
+                //         client.query(query2)
+                //     ]);
+                // } catch (err) {
+                //     console.error('Error executing queries:', err);
+                // } 
+
+
+                
+
+                // const insertedPartsWithCf = createParticipants.rows.map((row, index) => {id: row.id, })
+
+                // insertedParticipantsId.forEach(elm=>{
+                //     // for each participant id create its custom value
+                //     customValuesString = customValuesString.concat(`(${elm}, ${insertedOrderId}, ${eventId}),`)
+                // })
+                // const createCustomFields = 
+                // `insert into customvalues (participantid, cfid, ${col_name}) values (${participantid}, ${cfid}, ${typeof data === 'string'? `'${data}'`:data});`
+                // const newCustomField = await customValueControllerObj.insertCustomValue({participantid, cfid, data, col_name})
+
+
+
+
+
+
+                const createOrder = await (await client).query(`INSERT INTO orders (orderemail, paymentdetails, payment_status, date_created, amount_payed) VALUES ('${orderCreatorEmail}', '${paymentIntentId}', '${status}', '${created}', ${totalCharge}) RETURNING id`)
                 const insertedOrderId = createOrder.rows[0].id;
                 let ticketString = ''
                 console.table({paymentIntentId, insertedOrderId, eventId})
@@ -87,10 +149,19 @@ class TotalOrderModel{
                 insertedParticipantsId.forEach(elm=>{
                     ticketString = ticketString.concat(`(${elm}, ${insertedOrderId}, ${eventId}),`)
                 })
-
+                // fix when deleting tickets
                 const createTicketsQuery = `INSERT INTO tickets (participantid, orderid,eventid) VALUES ${ticketString.substring(0, ticketString.length-1)}`
                 const createTicekts = await (await client).query(createTicketsQuery)
-        
+                
+
+
+                
+                // console.log(dont)
+
+
+
+
+
                 await (await client).query('COMMIT'); // Commit the transaction
 
                 return resolve({

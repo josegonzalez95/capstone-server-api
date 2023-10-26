@@ -142,6 +142,7 @@ class TicketsModel{
      *
      * @param {*} ticketid - id number of the event.
      */
+    // fix when deleting tickets
     numberOfTickets(ticketid){
         return new Promise(async (resolve, reject) => {
             try {

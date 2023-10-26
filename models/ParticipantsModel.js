@@ -143,13 +143,79 @@ class ParticipantsModel{
         })
     }
 
+    getParticipantsWithCV(eventid){
+        return new Promise(async(resolve, reject)=>{
+            // fix when deleting tickets
+            try{
+                // Execute the first query
+                const participantsQuery = `
+                    SELECT participantid,birthdate, email, name, category, phone, address, gender, orderid, paymentdetails, payment_status
+                    FROM participants 
+                    INNER JOIN tickets ON participants.id = tickets.participantid 
+                    INNER JOIN orders o ON o.id = tickets.orderid 
+                    WHERE eventid=${eventid};
+                `;
+                const participantsResult = await (await this.db).query(participantsQuery);
+                const participants = participantsResult.rows;
+
+                // Execute the second query
+                const customValuesQuery = `
+                    SELECT *
+                    FROM customvalues 
+                    INNER JOIN customFields cF ON cF.id = customvalues.cfId
+                    WHERE eventid=${eventid}
+                    GROUP BY participantid, customvalues.id, cf.id;
+                `;
+                const customValuesResult = await (await this.db).query(customValuesQuery);
+                const customValues = customValuesResult.rows;
+
+                // Match the participants with their custom values
+                const participantsWithCustomValues = participants.map(participant => {
+                    const participantCustomValues = customValues.filter(customValue => customValue.participantid === participant.participantid);
+                    return { ...participant, customValues: participantCustomValues };
+                });
+
+
+                // console.log(participantsWithCustomValues)
+
+                const result = participantsWithCustomValues;
+                return resolve({
+                    result: result,
+                });
+            }catch(error){
+                console.log(error)
+            }
+        })
+    }
+
+    
+
     getParticipantsByEvent(eventid){
         return new Promise(async (resolve, reject) => {
+            // fix when deleting tickets
+            // select participants.*, o.*, string_agg(cv.string_value, '') as string_value, string_agg(cv.number_value::text, '') as number_value, string_agg(cv.boolean_value::text, '') as boolean_value, string_agg(cv.date_value::text, '') as date_value
+            // from participants
+            // inner join customvalues cv on participants.id = cv.participantid
+            // inner join tickets on participants.id = tickets.participantid
+            // inner join orders o on o.id = tickets.orderid
+            // where eventid=108
+            // group by participants.id, o.id;
             try {
                 // const db = await this.pool.connect()
                 // (await this.db).query(`SELECT participantid,birthdate, email, name, category, phone, address, gender, orderid from  participants inner join tickets on participants.id = tickets.participantid where eventid=${eventid};`, (err, response)=>{
                 (await this.db).query(`SELECT participantid,birthdate, email, name, category, phone, address, gender, orderid, paymentdetails from  participants inner join tickets on participants.id = tickets.participantid inner join orders o on o.id = tickets.orderid where eventid=${eventid};`, (err, response)=>{
 
+                // (await this.db).query(`
+                //     SELECT participants.id,birthdate, email, participants.name, category,
+                //         phone, address, gender, orderid, paymentdetails,
+                //         string_value, boolean_value, date_value, number_value, type
+                //     from  participants
+                //         inner join customvalues on participants.id = customValues.participantid
+                //         inner join customFields cF on cF.id = customValues.cfId
+                //         inner join tickets on participants.id = tickets.participantid
+                //         inner join orders o on o.id = tickets.orderid
+                //     where tickets.eventid=${eventid};
+                // `, (err, response)=>{
                     let result = response.rows
                     return resolve({
                         result: result,

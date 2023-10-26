@@ -14,10 +14,10 @@ class TotalOrderController {
     * @param {*} participantID - id of the participant the ticket belongs to.
     * @param {*} eventID - id number of the event this ticket is tied to.
     */
-    insertTotalOrder(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId){
+    insertTotalOrder(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId, status, totalCharge, created){
         return new Promise(async(resolve, reject) => {
             try {
-                const newOrder = await this.model.createOrder(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId)
+                const newOrder = await this.model.createOrder(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId, status, totalCharge, created)
                 let result = newOrder.result
                 return resolve({
                     result: result,

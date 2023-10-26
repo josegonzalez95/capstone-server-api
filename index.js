@@ -13,6 +13,9 @@ const jwt = require("jsonwebtoken");
 const middleware = require('./middleware/auth.js')
 const {logIn} = require('./auth/login.js')
 
+
+const { OptionsController } = require('./controllers/OptionsController.js')
+
 // const axios = require('axios')
 
 
@@ -64,6 +67,14 @@ const totalOrdersController = require('./controllers/TotalOrderController.js');
 const { sendEmail } = require('./herlpers/email.js');
 const totalOrderController = totalOrdersController.TotalOrderController
 const totalOrderControllerObj = new totalOrderController()
+
+const customFieldsController = require('./controllers/CustomFieldsController.js')
+const customFieldController = customFieldsController.CustomFieldsController
+const customFieldControllerObj = new customFieldController()
+
+const customValuesController = require('./controllers/CustomValuesController.js');
+const customValueController = customValuesController.CustomValuesController
+const customValueControllerObj = new customValueController()
 
 // run application server
 const myServer = app.listen(process.env.PORT, () => {
@@ -248,8 +259,9 @@ app.post('/capture-paypal-order', (req, res)=>{
 app.post("/totalOrderCreate", async(req, res)=>{
     try {
         console.log("total order creation")
-        const {participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId} = req.body
-        const newOrder = await totalOrderControllerObj.insertTotalOrder(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId)
+        const {participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId, status, totalCharge, created} = req.body
+        console.table(req.body)
+        const newOrder = await totalOrderControllerObj.insertTotalOrder(participants, paymentMethod, orderCreatorEmail, eventId, paymentIntentId, status, totalCharge, created)
         // res.send({"new total order":newOrder.result})
         res.status(200).send({"newTotalOrder":newOrder.result});
     } catch (error) {
@@ -526,7 +538,7 @@ app.get('/getAllOrders', async(req, res)=>{
     }
 })
 
-app.get('/getOrder', async(req, res)=>{
+app.post('/getOrder', async(req, res)=>{
     // console.log('getting order call', req.body)
     try {
         const {id} = req.body
@@ -749,10 +761,116 @@ app.post('/getEventsByDate', async(req,res)=>{
  *
  * @param {*} req.body.id - id of the event to be queried.
  */
+// add payment status to participants
 app.post('/participantsByEvent', middleware, async(req, res)=>{
     try {
         const {eventid} = req.body
+
+
         const participants = await participantControllerObj.showParticipantsByEvent(eventid)
+
+
+        const retrievePaymentDetailsWithDelay = async (item) => {
+            try {
+                
+                // console.table({index: index+1})
+
+
+                if (item.paymentdetails) {
+                const paymentIntent = await stripe.paymentIntents.retrieve(item.paymentdetails);
+                return { ...item, paymentdetails: paymentIntent.status };
+                } else {
+                return { ...item, paymentdetails: "failed" };
+                }
+            } catch (error) {
+                console.log(error.raw.message);
+                return { ...item, paymentdetails: "failed" };
+            } finally {
+                // Introduce a delay after each request to respect the rate limit
+                // await new Promise((resolve) => setTimeout(resolve, delay));
+            }
+        };
+
+        const rateLimit = 20; // Number of requests allowed per minute (25 per second)
+        const delay = 1000 / rateLimit; // Delay in milliseconds
+
+        const participantPromises = []
+        // participants.result.map(async(item, index) =>{
+        for(let i = 0; i<participants.result.length; i++){
+            const item = participants.result[i]
+            const index = i
+                if((index+1)%15===0){
+                    console.log('this is 15')
+                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                }
+                participantPromises.push(retrievePaymentDetailsWithDelay(item))
+
+            }
+        // );
+
+        Promise.all(participantPromises)
+        .then((results) => {
+            res.send({ participants: results });
+        })
+        .catch((error) => {
+            console.log(error.raw.message);
+            res.send({ error: "An error occurred" });
+        });
+    } catch (error) {
+        console.log(error.raw.message)
+    }
+})
+
+app.post('/participantsCV', middleware, async(req, res)=>{
+    try {
+        const {eventid} = req.body
+        const participants = await participantControllerObj.showParticipantsWithCV(eventid)
+        // const retrievePaymentDetailsWithDelay = async (item) => {
+        //     try {
+                
+        //         // console.table({index: index+1})
+
+
+        //         if (item.paymentdetails) {
+        //         const paymentIntent = await stripe.paymentIntents.retrieve(item.paymentdetails);
+        //         return { ...item, paymentdetails: paymentIntent.status };
+        //         } else {
+        //         return { ...item, paymentdetails: "failed" };
+        //         }
+        //     } catch (error) {
+        //         console.log(error.raw.message);
+        //         return { ...item, paymentdetails: "failed" };
+        //     } finally {
+        //         // Introduce a delay after each request to respect the rate limit
+        //         // await new Promise((resolve) => setTimeout(resolve, delay));
+        //     }
+        // };
+
+        // const rateLimit = 20; // Number of requests allowed per minute (25 per second)
+        // const delay = 1000 / rateLimit; // Delay in milliseconds
+
+        // const participantPromises = []
+        // // participants.result.map(async(item, index) =>{
+        // for(let i = 0; i<participants.result.length; i++){
+        //     const item = participants.result[i]
+        //     const index = i
+        //         if((index+1)%15===0){
+        //             console.log('this is 15')
+        //             await new Promise((resolve) => setTimeout(resolve, 1000));
+        //         }
+        //         participantPromises.push(retrievePaymentDetailsWithDelay(item))
+
+        //     }
+        // // );
+
+        // Promise.all(participantPromises)
+        // .then((results) => {
+        //     res.send({ participants: results });
+        // })
+        // .catch((error) => {
+        //     console.log(error.raw.message);
+        //     res.send({ error: "An error occurred" });
+        // });
         res.send({"participants":participants.result})
     } catch (error) {
         console.log(error)
@@ -837,3 +955,75 @@ app.post('/deleteWaiver',async(req, res)=>{
     }
 })
 //Leonel End
+
+
+app.post('/create-custom-field', async (req, res)=>{
+    try {
+        const {name, type, eventid} = req.body
+        const newCustomField = await customFieldControllerObj.insertCustomField({name, type, eventid})
+        res.status(200).send({"newCustomField":newCustomField.result})
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({message:"something went wrong creating custom field"})
+    }
+})
+
+app.post('/get-custom-fields-by-event', async (req, res)=>{
+    try {
+        const {eventid} = req.body
+        const eventCustomFields = await customFieldControllerObj.showEventCustomFields({eventid})
+        res.status(200).send({"eventCustomFields":eventCustomFields.result})
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({message:"something went wrong creating custom field"})
+    }
+})
+
+app.post('/create-participant-custom-value', async (req, res)=>{
+    try {
+        const {participantid, cfid, data, col_name} = req.body
+        const newCustomField = await customValueControllerObj.insertCustomValue({participantid, cfid, data, col_name})
+        res.status(200).send({"newCustomField":newCustomField.result})
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({message:"something went wrong creating custom field"})
+    }
+})
+
+app.post('/delete-custom-field', async (req, res)=>{
+    try {
+        const {id} = req.body
+        const deletedField = await customFieldControllerObj.removeCustomField(id)
+        res.status(200).send({"deleted field":deletedField.result})
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({message:"something went wrong deleting custom field"})
+    }
+})
+
+app.post('/change-published-cf', (req, res)=> customFieldControllerObj.editCustomFieldPublish(req, res))
+
+app.post('/update-field-name', (req, res)=> customFieldControllerObj.editCustomFieldName(req, res))
+
+
+// app.post('/get-custom-fields-by-event', async (req, res)=>{
+//     try {
+//         const {eventid} = req.body
+//         const eventCustomFields = await customFieldControllerObj.showEventCustomFields({eventid})
+//         res.status(200).send({"eventCustomFields":eventCustomFields.result})
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).send({message:"something went wrong creating custom field"})
+//     }
+// })
+
+
+// Custom Fields Options Routes
+const optionsController = new OptionsController()
+app.post('/create-option', (req, res) => optionsController.insertOption(req, res))
+
+app.post('/get-options', (req, res) => optionsController.showCustomFieldsOptions(req, res))
+
+app.post('/delete-option', (req, res) => optionsController.removeOption(req, res))
+
+app.post('/update-option', (req, res) => optionsController.editOption(req, res))

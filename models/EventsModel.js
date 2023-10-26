@@ -134,7 +134,7 @@ class EventsModel{
      *
      * @param {*} id - id number of the event to be queried for deletion.
      */
-
+// fix when deleting tickets
     deleteEvent(id){
         return new Promise(async(resolve, reject)=>{
             try{
