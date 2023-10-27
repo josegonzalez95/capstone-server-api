@@ -13,11 +13,11 @@ class CustomFieldsModel{
             try {
                 // const db = await this.pool.connect()
                 
-                (await this.db).query(`INSERT INTO customfields (name, type, eventid) values ('${name}', '${type}', ${eventid});`, (err, response)=>{
+                (await this.db).query(`INSERT INTO customfields (name, type, eventid, published) values ('${name}', '${type}', ${eventid}, true) returning id;`, (err, response)=>{
                     console.log(response)
                     let insertResult = response.rowCount
                     let status = insertResult > 0 ? "success":"failed"
-                    let result = {event: response.rows[0], status: status}
+                    let result = {field: response.rows[0], status: status}
                     return resolve({
                         result: result,
                     });
