@@ -57,7 +57,9 @@ class TotalOrderModel {
 		paymentIntentId,
 		status,
 		totalCharge,
-		created
+		created,
+		service_fee,
+		transaction_fee
 	) {
 		console.table({
 			participants,
@@ -68,6 +70,8 @@ class TotalOrderModel {
 			status,
 			totalCharge,
 			created,
+			service_fee,
+			transaction_fee,
 		});
 		return new Promise(async (resolve, reject) => {
 			const pool = new Pool({
@@ -91,10 +95,10 @@ class TotalOrderModel {
 
 				participants.forEach((elm) => {
 					string = string.concat(
-						`('${elm.name}', '${elm.email}', '${elm.phone}', '${elm.address}', '${elm.birthdate}', '${elm.category}', '${elm.gender}'),`
+						`('${elm.name}', '${elm.email}', '${elm.phone}'),`
 					);
 				});
-				const createParticipantsQuery = `insert into participants (name, email, phone, address, birthdate, category, gender) VALUES ${string.substring(
+				const createParticipantsQuery = `insert into participants (name, email, phone) VALUES ${string.substring(
 					0,
 					string.length - 1
 				)} RETURNING id`;
@@ -168,7 +172,7 @@ class TotalOrderModel {
 				const createOrder = await (
 					await client
 				).query(
-					`INSERT INTO orders (orderemail, paymentdetails, payment_status, date_created, amount_payed) VALUES ('${orderCreatorEmail}', '${paymentIntentId}', '${status}', '${created}', ${totalCharge}) RETURNING id`
+					`INSERT INTO orders (orderemail, paymentdetails, payment_status, date_created, amount_payed, service_fee, transaction_fee) VALUES ('${orderCreatorEmail}', '${paymentIntentId}', '${status}', '${created}', ${totalCharge}, ${service_fee}, ${transaction_fee}) RETURNING id`
 				);
 				const insertedOrderId = createOrder.rows[0].id;
 				let ticketString = '';

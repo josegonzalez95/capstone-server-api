@@ -204,13 +204,11 @@ app.post('/create-intent', async (req, res) => {
 			// payment_method_types: ['card']
 		});
 		// console.log(paymentIntent)
-		res
-			.status(200)
-			.send({
-				client_secret: paymentIntent.client_secret,
-				pi: paymentIntent.id,
-				paymentId: paymentIntent.payment_method_configuration_details.id,
-			});
+		res.status(200).send({
+			client_secret: paymentIntent.client_secret,
+			pi: paymentIntent.id,
+			paymentId: paymentIntent.payment_method_configuration_details.id,
+		});
 	} catch (error) {
 		res.status(500).send({ message: 'error occured processing payment' });
 	}
@@ -304,6 +302,8 @@ app.post('/totalOrderCreate', async (req, res) => {
 			status,
 			totalCharge,
 			created,
+			service_fee,
+			transaction_fee,
 		} = req.body;
 		console.table(req.body);
 		const newOrder = await totalOrderControllerObj.insertTotalOrder(
@@ -314,7 +314,9 @@ app.post('/totalOrderCreate', async (req, res) => {
 			paymentIntentId,
 			status,
 			totalCharge,
-			created
+			created,
+			service_fee,
+			transaction_fee
 		);
 		// res.send({"new total order":newOrder.result})
 		res.status(200).send({ newTotalOrder: newOrder.result });
