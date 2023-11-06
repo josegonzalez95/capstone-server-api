@@ -833,8 +833,17 @@ app.post('/createEvent', async (req, res) => {
  */
 app.post('/updateEvent', async (req, res) => {
 	try {
-		const { id, promoterid, details, price, location, photo, date, title } =
-			req.body;
+		const {
+			id,
+			promoterid,
+			details,
+			price,
+			location,
+			photo,
+			date,
+			title,
+			published,
+		} = req.body;
 		// console.log("update body", req.body)
 		const updatedEvent = await eventControllerObj.editEvent(
 			id,
@@ -844,7 +853,8 @@ app.post('/updateEvent', async (req, res) => {
 			location,
 			photo,
 			date,
-			title
+			title,
+			published
 		);
 		res.send({ updatedEvent: updatedEvent.result });
 	} catch (error) {
