@@ -200,7 +200,7 @@ app.post('/create-intent', async (req, res) => {
 			currency: 'usd',
 			automatic_payment_methods: { enabled: true },
 			description: 'Thanks for your purchase!',
-			receipt_email: 'jggm9090@gmail.com',
+			receipt_email: orderBodySend.orderCreatorEmail,
 			// payment_method_types: ['card']
 		});
 		// console.log(paymentIntent)
@@ -220,8 +220,8 @@ app.post('/confirm-payment', async (req, res) => {
 		const paymentIntent = await stripe.paymentIntents.confirm(pi, {
 			payment_method: paymentId,
 			payment_method_types: ['automatic_payment_methods'],
-			receipt_email: 'gonzalez.massini@gmail.com',
-			return_url: 'localhost:3000',
+			// receipt_email: 'gonzalez.massini@gmail.com',
+			// return_url: 'localhost:3000',
 		});
 		res.status(200).send({ status: paymentIntent.status });
 	} catch (error) {
@@ -843,6 +843,8 @@ app.post('/updateEvent', async (req, res) => {
 			date,
 			title,
 			published,
+			registrationstart,
+			registrationend,
 		} = req.body;
 		// console.log("update body", req.body)
 		const updatedEvent = await eventControllerObj.editEvent(
@@ -854,7 +856,9 @@ app.post('/updateEvent', async (req, res) => {
 			photo,
 			date,
 			title,
-			published
+			published,
+			registrationstart,
+			registrationend
 		);
 		res.send({ updatedEvent: updatedEvent.result });
 	} catch (error) {

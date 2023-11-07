@@ -127,6 +127,7 @@ class EventsModel {
 				(await this.db).query(
 					`update events SET ${propsToUpdate} where id=${id};`,
 					(err, response) => {
+						console.log(err);
 						// console.log("response from db",response)
 						let insertResult = response.rowCount;
 						let result = insertResult > 0 ? 'success' : 'failed';

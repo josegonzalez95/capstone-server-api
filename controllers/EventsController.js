@@ -100,7 +100,9 @@ class EventsController {
 		photo,
 		date,
 		title,
-		published
+		published,
+		registrationstart,
+		registrationend
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -114,6 +116,8 @@ class EventsController {
 					{ value: date, propName: 'date' },
 					{ value: title, propName: 'title' },
 					{ value: published, propName: 'published' },
+					{ value: registrationstart, propName: 'registrationstart' },
+					{ value: registrationend, propName: 'registrationend' },
 				];
 				console.log('props to edit', propsToEdit);
 				const updatedEvent = await this.model.udpateEvent(id, propsToEdit);

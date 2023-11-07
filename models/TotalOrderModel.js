@@ -179,7 +179,11 @@ class TotalOrderModel {
 				console.table({ paymentIntentId, insertedOrderId, eventId });
 				if (paymentIntentId !== 'free') {
 					await stripe.paymentIntents.update(paymentIntentId, {
-						metadata: { order_id: insertedOrderId, event_id: eventId },
+						metadata: {
+							order_id: insertedOrderId,
+							event_id: eventId,
+							order_email: orderCreatorEmail,
+						},
 					});
 				}
 
