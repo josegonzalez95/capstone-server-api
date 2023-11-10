@@ -95,10 +95,10 @@ class TotalOrderModel {
 
 				participants.forEach((elm) => {
 					string = string.concat(
-						`('${elm.name}', '${elm.email}', '${elm.phone}'),`
+						`('${elm.name}', '${elm.email}', '${elm.phone}', '${elm.waiver_signature}'),`
 					);
 				});
-				const createParticipantsQuery = `insert into participants (name, email, phone) VALUES ${string.substring(
+				const createParticipantsQuery = `insert into participants (name, email, phone, waiver_signature) VALUES ${string.substring(
 					0,
 					string.length - 1
 				)} RETURNING id`;

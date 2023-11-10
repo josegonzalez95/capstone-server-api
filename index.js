@@ -803,7 +803,7 @@ app.post('/getEventsByPomoter', async (req, res) => {
 app.post('/createEvent', async (req, res) => {
 	// console.log('create event endpoint call', req.body)
 	try {
-		const { promoterid, details, price, location, photo, date, title } =
+		const { promoterid, details, price, location, photo, date, title, waiver } =
 			req.body;
 		const newEvent = await eventControllerObj.insertEvent(
 			promoterid,
@@ -812,7 +812,8 @@ app.post('/createEvent', async (req, res) => {
 			location,
 			photo,
 			date,
-			title
+			title,
+			waiver
 		);
 		res.send({ newEvent: newEvent.result });
 	} catch (error) {

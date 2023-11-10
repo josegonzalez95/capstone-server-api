@@ -8,7 +8,16 @@ class EventsController {
 	}
 
 	// update insert event parameters
-	insertEvent(promoterid, details, price, location, photo, date, title) {
+	insertEvent(
+		promoterid,
+		details,
+		price,
+		location,
+		photo,
+		date,
+		title,
+		waiver
+	) {
 		console.log(promoterid, details, price, location, photo, date, title);
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -19,7 +28,8 @@ class EventsController {
 					location,
 					photo,
 					date,
-					title
+					title,
+					waiver
 				);
 				let result = newEvent.result;
 				return resolve({

@@ -43,14 +43,24 @@ class EventsModel {
 		});
 	}
 
-	createEvent(promoterid, details, price, location, photo, date, title) {
+	createEvent(
+		promoterid,
+		details,
+		price,
+		location,
+		photo,
+		date,
+		title,
+		waiver
+	) {
 		// console.log(promoterid, details, price, location, photo, date, title)
 		return new Promise(async (resolve, reject) => {
 			try {
 				// const db = await this.pool.connect()
 				(await this.db).query(
-					`insert into events (promoterid, details, price, location, photo, date, title, published) VALUES (${promoterid}, '${details}', ${price}, '${location}', '${photo}', '${date}', '${title}', false) RETURNING id;`,
+					`insert into events (promoterid, details, price, location, photo, date, title, published, waiver_form) VALUES (${promoterid}, '${details}', ${price}, '${location}', '${photo}', '${date}', '${title}', false, '${waiver}') RETURNING id;`,
 					(err, response) => {
+						console.log(err);
 						// console.log(response)
 						let insertResult = response.rowCount;
 						let status = insertResult > 0 ? 'success' : 'failed';
