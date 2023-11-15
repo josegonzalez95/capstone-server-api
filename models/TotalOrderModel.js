@@ -16,7 +16,7 @@ const stripe = require('stripe')(process.env.stripe_secret);
 //     port: 5432, // Default PostgreSQL port
 // });
 
-const connection_url = process.env.DB_URI;
+const connection_url = process.env.DATABASE_URL;
 // console.log(connection_url)
 // const pool = new Pool({
 //             connectionString:connection_url,

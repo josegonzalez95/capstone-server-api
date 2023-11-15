@@ -1,14 +1,18 @@
-const {Pool} = require('pg')
+const { Pool } = require('pg');
 
-const connection_url = process.env.DB_URI
-// console.log(connection_url)
-const pool = new Pool({
-            connectionString:connection_url,
-            ssl:{rejectUnauthorized: false},
-            max: 20,
-            idleTimeoutMillis: 30000
-        });
+const connection_url = process.env.DATABASE_URL;
+let db = {};
 
-const db = pool.connect()
+try {
+	const pool = new Pool({
+		connectionString: connection_url,
+		ssl: { rejectUnauthorized: false },
+		max: 20,
+		idleTimeoutMillis: 30000,
+	});
+	db = pool.connect();
+} catch (error) {
+	console.log('Error with PG DB connection', error);
+}
 
-module.exports = {DB: db}
+module.exports = { DB: db };
